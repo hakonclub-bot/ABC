@@ -1,21 +1,29 @@
 name: Create Sync PR When Dev Label Added
 
+permissions:
+  contents: write
+  pull-requests: write
+
 on:
-  pull_request:
-    types: [labeled]
+  pull_request_target:
+    types:
+      - labeled
 
 jobs:
   sync:
-    if: github.event.label.name == 'dev'
     runs-on: ubuntu-latest
+    if: github.event.label.name == 'dev'
+
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.head_ref }}
 
       - name: Create Sync PR
         uses: repo-sync/pull-request@v2
         with:
           source_branch: ${{ github.head_ref }}
           destination_branch: dev
-          pr_title: "Sync: ${{ github.head_ref }} → dev"
-          pr_body: "Auto-generated sync PR after adding dev label."
+          pr_title: "Auto Sync PR (dev label)"
+          pr_body: "This PR was automatically created when 'dev' label was added."
           github_token: ${{ secrets.GITHUB_TOKEN }}
